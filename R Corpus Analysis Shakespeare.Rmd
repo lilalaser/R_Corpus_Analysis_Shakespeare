@@ -15,7 +15,7 @@ data <- read.csv(file.choose(), header = TRUE)
 summary(data)
 ```
 
-1. Comparative Analysis of Familiar ('Thou/Thee') and Formal ('You/Ye(e)') Pronoun Usage":  Which plays included more instances of the familiar 2p pronoun ("thou/thee")
+a. Comparative Analysis of Familiar ('Thou/Thee') and Formal ('You/Ye(e)') Pronoun Usage":  Which plays included more instances of the familiar 2p pronoun ("thou/thee")
 relative to the formal 2p pronoun "you/ye(e)"?
 
 ```{r}
@@ -79,10 +79,10 @@ pronoun_table <-
 pronoun_table
 
 ```
-pronoun_table shows the 10 plays which include more instances of the familiar 2P pronoun  relative to the formal 2P pronoun. This might be due to socio-linguistic reasons: the majority of these plays feature protagonists who are at the top of society (usually a king, Timon of Athens was a member of the high society) so there is little reason for these protagonists to address anybody in the formal way. Most of the people they address are either in a socially equal or inferior position. However, other factors such as play genre, the speaker’s emotional state, or rhetorical choices may also play a role in pronoun usage and could be explored further.
+The data frame pronoun_table shows the 10 plays which include more instances of the familiar 2P pronoun relative to the formal 2P pronoun. This might be due to socio-linguistic reasons: the majority of these plays feature protagonists who are at the top of society (usually a king, Timon of Athens was a member of the high society) so there is little reason for these protagonists to address anybody in the formal way. Most of the people they address are either in a socially equal or inferior position. However, other factors such as play genre, the speaker’s emotional state, or rhetorical choices may also play a role in pronoun usage and could be explored further.
 
 
-2. Analysis of the use of familiar 2p pronoun and formal 2p pronoun across characters 
+b. Analysis of the Use of Familiar 2p Pronoun and Formal 2p Pronoun Across Characters 
 ```{r}
 # Create vector containing unique values from Player column
 player <- unique(data$Player) 
