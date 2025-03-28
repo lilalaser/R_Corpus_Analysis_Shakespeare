@@ -1,14 +1,17 @@
 Corpus Analysis Shakespeare
 
 1. Overview
+
 This project analyses the usage of familiar ("thou/thee") and formal ("you/ye") second-person pronouns across various plays by William Shakespeare. Using a dataset that includes Shakespeare's plays, the analysis investigates two main questions: 
 - a. Which plays included more instances of the familiar 2p pronoun ("thou/thee") relative to the formal 2p pronoun "you/ye(e)"?
 - b. Which characters were most likely to use the familiar 2p pronoun, and which were most likely to use the formal 2p pronoun?
 
 2. Dataset
+   
 The dataset contains all plays from the three main categories of Shakespeare's works: Comedies, Histories, and Tragedies.
 
 2.1 Source 
+
 The data was scraped from https://shakespeare.mit.edu/ and processed into .csv format. 
 
 2.2 Dataset Structure
