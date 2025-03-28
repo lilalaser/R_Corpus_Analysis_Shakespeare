@@ -1,0 +1,158 @@
+Shakespeare Corpus Analysis
+
+```{r}
+#Load required libraries
+library(dplyr)
+library(ggplot2)
+library(languageR)
+library(slam)
+library(tm)
+```
+
+```{r}
+#Load and summarize data
+data <- read.csv(file.choose(), header = TRUE)
+summary(data)
+```
+
+1. Comparative Analysis of Familiar ('Thou/Thee') and Formal ('You/Ye(e)') Pronoun Usage":  Which plays included more instances of the familiar 2p pronoun ("thou/thee")
+relative to the formal 2p pronoun "you/ye(e)"?
+
+```{r}
+#Filtering the "yee" variant
+grep("\\<(yee)\\>", tolower(data$PlayerLine), value = TRUE)
+```
+Apparently, the variant "yee" does not occur in any of the plays so it will not be 
+considered here any further.
+
+
+```{r}
+# Create vector containing unique values from Play column
+plays <- unique(data$Play) 
+# Create vectors to store the frequencies of "thou", "thee", "you" and "ye"
+thou_freq<-numeric()
+thee_freq<-numeric()
+you_freq<-numeric()
+ye_freq<-numeric()
+
+# Loop over each unique play
+for (i in seq_along(plays)){ 
+
+#Extraction and combination of PlayerLine into a single text
+  text <- Corpus(VectorSource(paste(data[data$Play==plays[i],]$PlayerLine,collapse=" ")))
+# Remove punctuation
+  text <- tm_map(text, removePunctuation) 
+#Create a term-document matrix (tdm), treating words as terms
+  tdm  <- TermDocumentMatrix(text, control=list(stopwords=FALSE, wordLengths=c(2, Inf)))
+
+#Counting occurrences of each pronoun and storing them in respective vector
+  thou_freq[i]<-as.numeric(slam::row_sums(tdm)["thou"])
+  thee_freq[i]<-as.numeric(slam::row_sums(tdm)["thee"])
+  you_freq[i]<-as.numeric(slam::row_sums(tdm)["you"])
+  ye_freq[i]<-as.numeric(slam::row_sums(tdm)["ye"])
+}
+```
+
+
+```{r}
+# Create dataframe containing plays and frequencies of pronouns
+pronoun_freq <- data.frame(plays, thou_freq, thee_freq, you_freq, ye_freq) 
+# Remove missing values
+pronoun_freq <- na.omit(pronoun_freq) 
+# Sort dataframe by frequency in descending order
+pronoun_freq <-pronoun_freq[order(-pronoun_freq$thou_freq, 
+                                  -pronoun_freq$thee_freq, 
+                                  -pronoun_freq$you_freq, 
+                                  -pronoun_freq$ye_freq),] 
+pronoun_freq
+```
+
+#Create summary table of pronoun usage, adding informal and formal counts, filtering for plays where informal pronouns are more prevalent than formal pronouns
+```{r}
+pronoun_table <-
+  pronoun_freq %>%
+  mutate(informal = thou_freq + thee_freq) %>%
+  mutate(formal = you_freq + ye_freq) %>%
+  group_by(plays, informal, formal) %>%
+  filter(informal > formal) %>%
+  summarise()
+pronoun_table
+
+```
+pronoun_table shows the 10 plays which include more instances of the familiar 2P pronoun  relative to the formal 2P pronoun. This might be due to socio-linguistic reasons: the majority of these plays feature protagonists who are at the top of society (usually a king, Timon of Athens was a member of the high society) so there is little reason for these protagonists to address anybody in the formal way. Most of the people they address are either in a socially equal or inferior position. However, other factors such as play genre, the speaker’s emotional state, or rhetorical choices may also play a role in pronoun usage and could be explored further.
+
+
+2. Analysis of the use of familiar 2p pronoun and formal 2p pronoun across characters 
+```{r}
+# Create vector containing unique values from Player column
+player <- unique(data$Player) 
+# Create vectors to store the frequencies of "thou", "thee", "you" and "ye" per player
+thou_freq_player<-numeric()
+thee_freq_player<-numeric()
+you_freq_player<-numeric()
+ye_freq_player<-numeric()
+
+```
+
+```{r}
+## Loop over each unique player
+for (i in seq_along(player)){ 
+  # Combine all lines spoken by the player into text corpus
+  text <- Corpus(VectorSource(paste(data[data$Player==player[i],]$PlayerLine,collapse=" ")))
+  # Remove punctuation
+  text <- tm_map(text, removePunctuation) 
+  #Create a term-document matrix (tdm), treating words as terms
+  tdm  <- TermDocumentMatrix(text, control=list(stopwords=FALSE, wordLengths=c(2, Inf)))
+   # Calculate frequencies for each pronoun
+  thou_freq_player[i]<-as.numeric(slam::row_sums(tdm)["thou"]) 
+  thee_freq_player[i]<-as.numeric(slam::row_sums(tdm)["thee"]) 
+  you_freq_player[i]<-as.numeric(slam::row_sums(tdm)["you"]) 
+  ye_freq_player[i]<-as.numeric(slam::row_sums(tdm)["ye"]) 
+}
+```
+
+```{r}
+# Create dataframe containing player names and frequencies of pronouns
+pronoun_freq_player <- data.frame(player, thou_freq_player, thee_freq_player, you_freq_player, ye_freq_player) 
+# Remove missing values
+pronoun_freq_player <- na.omit(pronoun_freq_player) 
+# Sort dataframe by frequency in descending order
+pronoun_freq_player <-pronoun_freq_player[order(-pronoun_freq_player$thou_freq_player
+                                                -pronoun_freq_player$thee_freq_player,
+                                                -pronoun_freq_player$you_freq_player, 
+                                                -pronoun_freq_player$ye_freq_player),]
+pronoun_freq_player 
+```
+
+```{r}
+# Filter players who predominantly use informal pronouns and sort by frequency
+informal_freq_player <- pronoun_freq_player %>%
+  mutate(informal_player = thou_freq_player + thee_freq_player) %>%
+  mutate(formal_player = you_freq_player + ye_freq_player) %>%
+  group_by(player, informal_player, formal_player) %>%
+  filter(informal_player > formal_player) %>%
+  summarise()
+informal_freq_player
+
+# Sort the data frame by informal pronoun frequency in descending order
+informal_freq_player <-informal_freq_player[order(-informal_freq_player$informal_player),] 
+informal_freq_player
+
+```
+The data frame informal_freq_player shows the 32 characters who use the informal variant of the 2P pronoun  more frequently than the formal Among the first 10 most frequent hits, the majority is, once again, regents (or in Timon's case a member of the high society). 
+An exception to this trend is Falstaff, but considering the fact that Falstaff is a close companion to the king, it is not surprising that he uses the informal pronoun so often as their relationship is a personal one.
+
+```{r}
+# Filter players who predominantly use formal pronouns and sort by frequency
+formal_freq_player <- pronoun_freq_player %>%
+  mutate(informal_player = thou_freq_player + thee_freq_player) %>%
+  mutate(formal_player = you_freq_player + ye_freq_player) %>%
+  group_by(player, informal_player, formal_player) %>%
+  filter(formal_player > informal_player) %>%
+  summarise()
+formal_freq_player
+# Sort the resulting data frame by formal pronoun frequency in descending order
+  formal_freq_player <-formal_freq_player[order(-formal_freq_player$formal_player),] 
+  formal_freq_player
+```
+The dataframe formal_freq_player lists the 66 characters who use the formal 2P pronoun more often. Among the first 10 most frequent hits are some regents, in these cases a possible explanation for the use of the formal pronoun are speaking in public addressing a group of people. This might  also be the case for Brutus. The formal pronoun is also employed to address people in  a higher social position and this fact might explain Hamlet's and Helena's use of you/ye. 
